@@ -1,0 +1,1295 @@
+
+
+= SendGrid Connector Reference
+
+SendGrid is a cloud-based SMTP provider that allows you to send email without having to maintain email servers. SendGrid manages all of the technical details, from scaling the infrastructure to ISP outreach and reputation monitoring to whitelist services and real time analytics.
+
+
+
+== Configurations
+---
+[[Config]]
+=== Config
+
+
+Default configuration
+
+
+==== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+|Name | String | The name for this configuration. Connectors reference the configuration with this name. | | *x*{nbsp}
+| Connection a| <<Config_Connection, Basic Authentication>>
+ | The connection types that can be provided to this configuration. | | *x*{nbsp}
+| Read Timeout a| Number |  Time in seconds to wait for the response. 0 means infinite |  0 | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  Time unit to be used in the readTimeoutTimeout configurations |  SECONDS | {nbsp}
+| Name a| String |  The identifier of this element used to reference it in other components |  | *x*{nbsp}
+| Expiration Policy a| <<ExpirationPolicy>> |  Configures the minimum amount of time that a dynamic configuration instance can remain idle before the runtime considers it eligible for expiration. This does not mean that the platform will expire the instance at the exact moment that it becomes eligible. The runtime will actually purge the instances when it sees it fit. |  | {nbsp}
+|===
+
+==== Connection Types
+[[Config_Connection]]
+===== Connection
+
+
+This class (as it's name implies) provides connection instances and the functionality to disconnect and validate those connections. All connection related parameters (values required in order to create a connection) must be declared in the connection providers. This particular example is a PoolingConnectionProvider which declares that connections resolved by this provider will be pooled and reused. There are other implementations like CachedConnectionProvider which lazily creates and caches connections or simply ConnectionProvider if you want a new connection each time something requires one.
+
+
+====== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Protocol a| Enumeration, one of:
+
+** HTTP
+** HTTPS |  Protocol to use for communication. Valid values are HTTP and HTTPS. \nDefault value is HTTP. When using HTTPS the HTTP communication is going to be secured using TLS / SSL. \nIf HTTPS was configured as protocol then the user needs to configure at least the keystore in the tls:context child element of this listener-config. |  HTTP | {nbsp}
+| Base Uri a| String |  base URI of SendGrid API |  | *x*{nbsp}
+| Api Key a| String |  apiKey to access SendGrid API |  | *x*{nbsp}
+| TLS Configuration a| <<Tls>> |  Reference to a TLS config element. This will enable HTTPS for this config |  | {nbsp}
+| Proxy Configuration a| <<Default>> |  Proxy connection configuration. |  | {nbsp}
+| Connection Timeout a| Number |  The timeout for establishing connections to the remote service. This attribute works in tandem with #connectionTimeoutUnit. |  30 | {nbsp}
+| Connection Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #connectionTimeout |  SECONDS | {nbsp}
+| Use Persistent Connections a| Boolean |  If false, each connection will be closed after the first request is completed. |  true | {nbsp}
+| Max Connections a| Number |  The maximum number of outbound connection that will be kept open at the same time. By default the number of connection is unlimited. |  -1 | {nbsp}
+| Connection Idle Timeout a| Number |  The time that a connection can remain idle before it is closed. The value of this attribute is only used when persistent connection are enabled.This attribute works in tandem with #connectionIdleTimeoutUnit |  30 | {nbsp}
+| Connection Idle Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #connectionIdleTimeout |  SECONDS | {nbsp}
+| Stream Response a| Boolean |  Whether or not received responses should be streamed, meaning processing will continue as soon as all headers are parsed and the body streamed as it arrives. When enabled, the response MUST be eventually read since depending on the configured buffer size it may not fit into memory and processing will stop until space is available. |  false | {nbsp}
+| Response Buffer Size a| Number |  The space in bytes for the buffer where the HTTP response will be stored. |  -1 | {nbsp}
+| Cache Control a| String |  The Cache control strategy. |  no-cache | {nbsp}
+| Reconnection a| <<Reconnection>> |  When the application is deployed, a connectivity test is performed on all connectors. If set to true, deployment will fail if the test doesn't pass after exhausting the associated reconnection strategy |  | {nbsp}
+|===
+
+==== Associated Operations
+* <<AddOrUpdateContactOperation>> {nbsp}
+* <<CreateBatchId>> {nbsp}
+* <<CreateDesignOperation>> {nbsp}
+* <<CreateNewAlertOperation>> {nbsp}
+* <<CreateSenderIdentityOperation>> {nbsp}
+* <<CreateTransactionalTemplateOperation>> {nbsp}
+* <<DeleteDesign>> {nbsp}
+* <<EditTransactionalTemplateOperation>> {nbsp}
+* <<ExportContactsOperation>> {nbsp}
+* <<GetAllAutomationStatsOperation>> {nbsp}
+* <<GetDesignsOperation>> {nbsp}
+* <<GetUserProfileOperation>> {nbsp}
+* <<RetrieveScheduledSendsOperation>> {nbsp}
+* <<SendMailOperation>> {nbsp}
+* <<UpdateDesignOperation>> {nbsp}
+* <<UpdateUserProfileOperation>> {nbsp}
+
+
+
+== Operations
+
+[[AddOrUpdateContactOperation]]
+== Add or Update Contact
+`<sendgrid:add-or-update-contact>`
+
+
+This allows the upsert (insert or update) of up to 30000 contacts
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Contact a| Object |  Contact details to add or update contact |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[CreateBatchId]]
+== Create Batch Id
+`<sendgrid:create-batch-id>`
+
+
+This allows you to generate a new batch ID. This batch ID can be associated with scheduled sends via the mail/send endpoint.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[CreateDesignOperation]]
+== Create Design
+`<sendgrid:create-design>`
+
+
+This allows you to create a new design.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Design a| Object |  You can add a new design by passing data, including a string of HTML email content |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+[[CreateNewAlertOperation]]
+== Create New Alert
+`<sendgrid:create-new-alert>`
+
+
+This allows you to create a new alert.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Alert a| Object |  Alert details you want to create |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[CreateSenderIdentityOperation]]
+== Create Sender Identity
+`<sendgrid:create-sender-identity>`
+
+
+This allows you to create a new sender identity.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Sender Identity a| Object |  Senders identity information |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+[[CreateTransactionalTemplateOperation]]
+== Create Transactional Template
+`<sendgrid:create-transactional-template>`
+
+
+This allows you to create a transactional template.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Template a| Object |  New transactional templates information |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[DeleteDesign]]
+== Delete Design
+`<sendgrid:delete-design>`
+
+
+This allows you to delete a single design.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Design Id a| String |  The ID of the Design you want to retrieve. format: uuid |  | *x*{nbsp}
+| Output Mime Type a| String |  The mime type of the payload that this operation outputs. |  | {nbsp}
+| Output Encoding a| String |  The encoding of the payload that this operation outputs. |  | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Binary
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+[[EditTransactionalTemplateOperation]]
+== Edit Transactional Template
+`<sendgrid:edit-transactional-template>`
+
+
+This allows you to retrieve update transactional templates.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Template Id a| String |  The id of the transactional template you want to edit. |  | *x*{nbsp}
+| Transactional Template a| Object |  Transactional Template information you want to update. |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[ExportContactsOperation]]
+== Export Contacts
+`<sendgrid:export-contacts>`
+
+
+If you would like to just have a link to the exported list sent to your email set the notifications.email option to true.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Contacts a| Object |  Contact details to add or update contact |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[GetAllAutomationStatsOperation]]
+== Get All Automation Stats
+`<sendgrid:get-all-automation-stats>`
+
+
+This allows you to retrieve stats for a single automation using an automation ID. This allows you to retrieve stats for all your automations.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Page Size a| Number |  The number of elements you want returned on each page |  | {nbsp}
+| Page Token a| String |  The stats endpoints are paginated |  | {nbsp}
+| Automation Ids a| Array of String |  This endpoint returns all automation ids if automation_ids are not specified. |  | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[GetDesignsOperation]]
+== Get Designs
+`<sendgrid:get-designs>`
+
+
+This allows you to retrieve a single design by designId. Also allows you to retrieve all design.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Page Size a| Number |  Number of results to return |  | {nbsp}
+| Page Token a| String |  Token corresponding to a specific page of results, as provided by metadata |  | {nbsp}
+| Summary a| Boolean |  Set to false to return all fields |  false | {nbsp}
+| Design Id a| String |  The ID of the Design you want to retrieve. format: uuid |  | *x*{nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[GetUserProfileOperation]]
+== Get Users Profile
+`<sendgrid:get-user-profile>`
+
+
+This allows you to retrieve users profile.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[RetrieveScheduledSendsOperation]]
+== Retrieve Scheduled Sends
+`<sendgrid:retrieve-scheduled-sends>`
+
+
+This endpoint allows you to retrieve the cancel/paused scheduled send information for a specific batch_id. This endpoint allows you to retrieve all cancel/paused scheduled send information.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Batch Id a| String |  Id for scheduled send |  | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Array of * Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[SendMailOperation]]
+== Send Mail
+`<sendgrid:send-mail>`
+
+
+This allows you to send email over SendGrid v3.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Send Mail a| Object |  mail details |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[UpdateDesignOperation]]
+== Update Design
+`<sendgrid:update-design>`
+
+
+This allows you to edit a design.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| Design Id a| String |  The ID of the Design you want to retrieve. format: uuid |  | *x*{nbsp}
+| Designs a| Object |  You can add a new design by passing data, including a string of HTML email content |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+[[UpdateUserProfileOperation]]
+== Update User Profile
+`<sendgrid:update-user-profile>`
+
+
+This allows you to update your current profile details.
+
+
+=== Parameters
+
+[%header%autowidth.spread]
+|===
+| Name | Type | Description | Default Value | Required
+| Configuration | String | The name of the configuration to use. | | *x*{nbsp}
+| On Behalf a| String |  The subuser's username |  | {nbsp}
+| Profile a| Object |  Users profile details to be updated |  #[payload] | {nbsp}
+| Config Ref a| ConfigurationProvider |  The name of the configuration to be used to execute this component |  | *x*{nbsp}
+| Streaming Strategy a| * <<RepeatableInMemoryStream>>
+* <<RepeatableFileStoreStream>>
+* non-repeatable-stream |  Configure if repeatable streams should be used and their behaviour |  | {nbsp}
+| Read Timeout a| Number |  Specifies the amount of time, in milliseconds, that the consumer will wait for the response before it times out. Default value is 0, which means infinite. This attribute works in tandem with #readTimeoutUnit |  | {nbsp}
+| Read Timeout Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS |  A TimeUnit that qualifies the #readTimeout |  | {nbsp}
+| Target Variable a| String |  The name of a variable on which the operation's output will be placed |  | {nbsp}
+| Target Value a| String |  An expression that will be evaluated against the operation's output and the outcome of that expression will be stored in the target variable |  #[payload] | {nbsp}
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> |  A retry strategy in case of connectivity errors |  | {nbsp}
+|===
+
+=== Output
+
+[%autowidth.spread]
+|===
+| *Type* a| Any
+| *Attributes Type* a| <<HttpResponseAttributes>>
+|===
+
+=== For Configurations
+
+* <<Config>> {nbsp}
+
+=== Throws
+
+* SENDGRID:BAD_REQUEST {nbsp}
+* SENDGRID:CONNECTIVITY {nbsp}
+* SENDGRID:FORBIDDEN {nbsp}
+* SENDGRID:INTERNAL_SERVER_ERROR {nbsp}
+* SENDGRID:NOT_FOUND {nbsp}
+* SENDGRID:REMOTELY_CLOSED {nbsp}
+* SENDGRID:RETRY_EXHAUSTED {nbsp}
+* SENDGRID:SERVICE_UNAVAILABLE {nbsp}
+* SENDGRID:TIMEOUT {nbsp}
+* SENDGRID:TOO_MANY_REQUEST {nbsp}
+* SENDGRID:UNAUTHORIZED {nbsp}
+
+
+
+== Types
+[[Tls]]
+=== Tls
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Enabled Protocols a| String | A comma separated list of protocols enabled for this context. |  | 
+| Enabled Cipher Suites a| String | A comma separated list of cipher suites enabled for this context. |  | 
+| Trust Store a| <<TrustStore>> |  |  | 
+| Key Store a| <<KeyStore>> |  |  | 
+| Revocation Check a| * <<StandardRevocationCheck>>
+* <<CustomOcspResponder>>
+* <<CrlFile>> |  |  | 
+|======================
+
+[[TrustStore]]
+=== Trust Store
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Path a| String | The location (which will be resolved relative to the current classpath and file system, if possible) of the trust store. |  | 
+| Password a| String | The password used to protect the trust store. |  | 
+| Type a| String | The type of store used. |  | 
+| Algorithm a| String | The algorithm used by the trust store. |  | 
+| Insecure a| Boolean | If true, no certificate validations will be performed, rendering connections vulnerable to attacks. Use at your own risk. |  | 
+|======================
+
+[[KeyStore]]
+=== Key Store
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Path a| String | The location (which will be resolved relative to the current classpath and file system, if possible) of the key store. |  | 
+| Type a| String | The type of store used. |  | 
+| Alias a| String | When the key store contains many private keys, this attribute indicates the alias of the key that should be used. If not defined, the first key in the file will be used by default. |  | 
+| Key Password a| String | The password used to protect the private key. |  | 
+| Password a| String | The password used to protect the key store. |  | 
+| Algorithm a| String | The algorithm used by the key store. |  | 
+|======================
+
+[[StandardRevocationCheck]]
+=== Standard Revocation Check
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Only End Entities a| Boolean | Only verify the last element of the certificate chain. |  | 
+| Prefer Crls a| Boolean | Try CRL instead of OCSP first. |  | 
+| No Fallback a| Boolean | Do not use the secondary checking method (the one not selected before). |  | 
+| Soft Fail a| Boolean | Avoid verification failure when the revocation server can not be reached or is busy. |  | 
+|======================
+
+[[CustomOcspResponder]]
+=== Custom Ocsp Responder
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Url a| String | The URL of the OCSP responder. |  | 
+| Cert Alias a| String | Alias of the signing certificate for the OCSP response (must be in the trust store), if present. |  | 
+|======================
+
+[[CrlFile]]
+=== Crl File
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Path a| String | The path to the CRL file. |  | 
+|======================
+
+[[Default]]
+=== Default
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Host a| String | Host where the proxy requests will be sent. |  | x
+| Port a| Number | Port where the proxy requests will be sent. |  | x
+| Username a| String | The username to authenticate against the proxy. |  | 
+| Password a| String | The password to authenticate against the proxy. |  | 
+| Non Proxy Hosts a| String | A list of comma separated hosts against which the proxy should not be used |  | 
+|======================
+
+[[Reconnection]]
+=== Reconnection
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Fails Deployment a| Boolean | When the application is deployed, a connectivity test is performed on all connectors. If set to true, deployment will fail if the test doesn't pass after exhausting the associated reconnection strategy |  | 
+| Reconnection Strategy a| * <<Reconnect>>
+* <<ReconnectForever>> | The reconnection strategy to use |  | 
+|======================
+
+[[Reconnect]]
+=== Reconnect
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Frequency a| Number | How often (in ms) to reconnect |  | 
+| Blocking a| Boolean | If false, the reconnection strategy will run in a separate, non-blocking thread |  | 
+| Count a| Number | How many reconnection attempts to make |  | 
+|======================
+
+[[ReconnectForever]]
+=== Reconnect Forever
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Frequency a| Number | How often (in ms) to reconnect |  | 
+| Blocking a| Boolean | If false, the reconnection strategy will run in a separate, non-blocking thread |  | 
+|======================
+
+[[ExpirationPolicy]]
+=== Expiration Policy
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Max Idle Time a| Number | A scalar time value for the maximum amount of time a dynamic configuration instance should be allowed to be idle before it's considered eligible for expiration |  | 
+| Time Unit a| Enumeration, one of:
+
+** NANOSECONDS
+** MICROSECONDS
+** MILLISECONDS
+** SECONDS
+** MINUTES
+** HOURS
+** DAYS | A time unit that qualifies the maxIdleTime attribute |  | 
+|======================
+
+[[HttpResponseAttributes]]
+=== Http Response Attributes
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Status Code a| Number |  |  | x
+| Reason Phrase a| String |  |  | x
+| Headers a| Object |  |  | x
+|======================
+
+[[RepeatableInMemoryStream]]
+=== Repeatable In Memory Stream
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| Initial Buffer Size a| Number | This is the amount of memory that will be allocated in order to consume the stream and provide random access to it. If the stream contains more data than can be fit into this buffer, then it will be expanded by according to the bufferSizeIncrement attribute, with an upper limit of maxInMemorySize. |  | 
+| Buffer Size Increment a| Number | This is by how much will be buffer size by expanded if it exceeds its initial size. Setting a value of zero or lower will mean that the buffer should not expand, meaning that a STREAM_MAXIMUM_SIZE_EXCEEDED error will be raised when the buffer gets full. |  | 
+| Max Buffer Size a| Number | This is the maximum amount of memory that will be used. If more than that is used then a STREAM_MAXIMUM_SIZE_EXCEEDED error will be raised. A value lower or equal to zero means no limit. |  | 
+| Buffer Unit a| Enumeration, one of:
+
+** BYTE
+** KB
+** MB
+** GB | The unit in which all these attributes are expressed |  | 
+|======================
+
+[[RepeatableFileStoreStream]]
+=== Repeatable File Store Stream
+
+[cols=".^20%,.^25%,.^30%,.^15%,.^10%", options="header"]
+|======================
+| Field | Type | Description | Default Value | Required
+| In Memory Size a| Number | Defines the maximum memory that the stream should use to keep data in memory. If more than that is consumed then it will start to buffer the content on disk. |  | 
+| Buffer Unit a| Enumeration, one of:
+
+** BYTE
+** KB
+** MB
+** GB | The unit in which maxInMemorySize is expressed |  | 
+|======================
+
