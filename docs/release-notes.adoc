@@ -1,6 +1,6 @@
 # SendGrid Connector Release Notes - Mule 4
 
-== September 2021
+== Sep 22, 2021
 
 ## Version 1.0.0 - Compatibility
 
